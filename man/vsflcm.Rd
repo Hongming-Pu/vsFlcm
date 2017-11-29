@@ -2,12 +2,13 @@
 % Please edit documentation in R/vsflcm.R
 \name{vsflcm}
 \alias{vsflcm}
-\title{vb_concurrent}
+\title{Implements group lasso with fpc for the linear functional concurrent model}
 \usage{
 vsflcm(formula, data = NULL, id.time = NULL, id.sub = NULL,
   t.min = NULL, t.max = NULL, K = 5, spline.fun = "B-spline",
-  lambda = 0.5, K0 = 2, delta = 1e-05, method.optim = "BFGS",
-  times = 1, fpc.on = TRUE)
+  lambda = 0.5, K0 = 2, lam.nuc = 10, method.obj = c("nuclear",
+  "nonconvex"), delta = 0.1, method.optim = c("Nelder-Mead", "BFGS", "CG",
+  "L-BFGS-B", "SANN", "Brent"), times = 1, fpc.on = TRUE)
 }
 \arguments{
 \item{formula}{formula for the regression. should have form \code{ y ~ V1 + V2 + ... + Vk}. Note: don't contain \code{id.time}}
@@ -30,11 +31,15 @@ vsflcm(formula, data = NULL, id.time = NULL, id.sub = NULL,
 
 \item{K0}{number of FPCs}
 
-\item{delta}{When the square of the norm of the coefficient is smaller than \code{delta}, L1 penalty will smoothly turned into L2 penalty}
+\item{lam.nuc}{Only Useful when \code{method.obj}='nuclear'. penalty factor for the nuclear norm}
+
+\item{method.obj}{the methodology chosen. Should be 'nuclear' or 'nonconvex'. Typically, we recommend 'nuclear'}
+
+\item{delta}{Only useful when \code{method.obj}='nonconvex'. When the square of the norm of the coefficient is smaller than \code{delta}, L1 penalty will smoothly turned into L2 penalty}
 
 \item{method.optim}{the optimization method to be used. For details and other options, please refer to \code{optim}}
 
-\item{times}{the algorithm randomly chooses \code{times} initial points to optimize and select the best}
+\item{times}{Only useful when \code{method.obj}='nonconvex'. the algorithm randomly chooses \code{times} initial points to optimize and select the best}
 
 \item{fpc.on}{Logical. Whether fpc will be used}
 }
