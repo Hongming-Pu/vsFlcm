@@ -8,6 +8,7 @@
 #'
 #' @author Hongming Pu \email{phmhappier@@163.com}
 #'
+#' @importFrom stats predict
 #' @import dplyr
 #'
 #' @export
@@ -19,19 +20,27 @@ predict.flcmgl<-function(obj,data,sub.reg=TRUE){
 
   bas<-obj$basis.fun(ts)
   bas.beta<-bas%*%obj$beta
-  mean.mat<-rep(1,n) %*% t(obj$means)
+  #mean.mat<-rep(1,n) %*% t(obj$means)
   sd.mat<-rep(1,n) %*% t(obj$sds)
   values.pre= data %>% subset(select=obj$predictors) %>%
-    '-'(mean.mat) %>% '/'(sd.mat) %>%
+    '/'(sd.mat) %>%
     '*'(bas.beta) %>% apply(1, sum)
+
+  fun<-function(x){
+    temp<-which(x)
+    if(length(temp==1)){
+      return(temp)
+    }else{return(obj$n.sub+1)}
+  }
   if(sub.reg && obj$fpc.on){
-    values.resi.pre<-rep(0,length(values.pre))
-    for (i in c(1:n)) {
-      temp<-which(obj$subs== data[i,obj$id.sub])
-      if(length(temp==1)){##find this subject
-        values.resi.pre[i]<-t(bas[i,])%*%res$theta%*%res$cs[((temp-1)*res$K0+1):(temp*res$K0)]
-      }
-    }
+      thetaCs<-matrix(0,nrow=obj$K,ncol = obj$n.sub+1)
+      thetaCs[,1:obj$n.sub]<-res$thetaCs
+      values.resi.pre<-rep(0,length(values.pre))
+      m1<-matrix(rep(data[,obj$id.sub],obj$n.sub),nrow=n,ncol = obj$n.sub)
+      m2<-matrix(rep(obj$subs,n),ncol = obj$n.sub,nrow=n,byrow = TRUE)
+      jud<-(m1==m2)
+      inds<-apply(jud, 1, fun)
+      values.resi.pre<-apply(t(bas)*thetaCs[,inds],2,sum)
     values.pre<-values.pre+values.resi.pre
   }
   return(values.pre)
