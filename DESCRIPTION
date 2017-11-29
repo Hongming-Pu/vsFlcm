@@ -1,20 +1,11 @@
 Package: vsFlcm
 Type: Package
-Title: Variable Selection(Group Lasso) for the Functional Linear Concurrent Model
+Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Hongming Pu
-Maintainer: Hongming Pu <phmhappier@163.com>
-Description: Variable Selection(Group Lasso) for the functional linear concurrent model 
-Imports:
-    dplyr,
-    splines
-Collate: 
-    'myInt.R'
-    'stanFit.R'
-    'predict.flcmgl.R'
-    'vsflcm.R'
-License: GPL (>= 2)
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
-
