@@ -8,8 +8,6 @@ This package implements two statistical methods  for selecting variables in the 
 
 
 
-#Methodology#
-
 The functional linear concurrent model can be written as 
 
  $$Y_{i}(t)=\Sigma_{k=1}^{p}X_{ik}(t)\beta_{k}(t)+\delta_{i}(t)+\epsilon_{i}(t)$$
