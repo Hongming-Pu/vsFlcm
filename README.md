@@ -1,4 +1,4 @@
-#vsFlcm： Variable Selection in FLCM（Functional Linear Concurrent Model)#
+# vsFlcm
 
 Author: Hongming Pu (phmhappier@163.com)
 
@@ -6,7 +6,7 @@ Version: 0.2.0
 
 This package implements two statistical methods  for selecting variables in the functional linear concurrent model. These methods are described later in this article.
 
-##Methodology#
+#Methodology#
 
 The functional linear concurrent model can be written as 
 
