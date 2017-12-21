@@ -6,6 +6,8 @@ Version: 0.2.0
 
 This package implements two statistical methods  for selecting variables in the functional linear concurrent model. These methods are described later in this article.
 
+
+
 #Methodology#
 
 The functional linear concurrent model can be written as 
