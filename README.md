@@ -1,1 +1,3 @@
-![README](D:\我的文件\专业：统计计算机数学资料\本研\本研贾金柱\vsFlcm-master\vsFlcm-master\README.png)
+#vsFlcm：Variable Selection in FLCM (Functional Linear Concurrent Model)#
+
+For more information, please refer to README.pdf
