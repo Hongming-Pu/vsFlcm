@@ -1,4 +1,4 @@
-#vsFlcm： Variable Selection in FLCM（Functional Linear Concurrent Model)
+#vsFlcm： Variable Selection in FLCM（Functional Linear Concurrent Model)#
 
 Author: Hongming Pu (phmhappier@163.com)
 
@@ -6,7 +6,7 @@ Version: 0.2.0
 
 This package implements two statistical methods  for selecting variables in the functional linear concurrent model. These methods are described later in this article.
 
-#Methodolgy
+#Methodology#
 
 The functional linear concurrent model can be written as 
 
@@ -76,7 +76,7 @@ vsflcm(...,method.obj='nuclear',...)
 
 Typically the second method is better.
 
-#Installation
+#Installation#
 
 You can install this package from GitHub with [devtools](https://github.com/hadley/devtools):
 
@@ -87,7 +87,7 @@ devtools::install_github("Hongming-Pu/vsFlcm")
 
 
 
-#Example of Use
+#Example of Use#
 
 The code below simulates a dataset under the functional linear concurrent model. For each of 30 subjects, observations of 30 predictor functions and a response function are observed over times between 0 and 1.  Different subjects have different individual effects.
 
