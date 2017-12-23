@@ -8,7 +8,7 @@
 #' @param t.max maximum value to be evaluated on the time domain. if `NULL`, taken to be minium observed value.
 #' @param K number of spline basis functions for coefficients and fpc
 #' @param spline.fun spline basis functions. If not default, it should be a function taking a vector(corresponding to time) belonging to [0,1] as input and returning a \code{length(vector)*K} spline matrix where each row corresponds to a time point in the vector and each column corresponds to a spline basis function
-#' @param lambda Constant multiplying the L1 penalty term
+#' @param lambda Constant to multiply the L1 penalty term
 #' @param K0 number of FPCs
 #' @param delta Only useful when \code{method.obj}='nonconvex'. When the square of the norm of the coefficient is smaller than \code{delta}, L1 penalty will smoothly turned into L2 penalty
 #' @param method.optim the optimization method to be used. For details and other options, please refer to \code{optim}
@@ -87,7 +87,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
   }
   indexs[res$n.sub+1]<-res$n.total+1
 
-  #provide basis and design matrix
+  #compute basis and design matrix
   knots.bspline<-quantile(ts,probs=seq(0,1,length=K-2))[-c(1,K-2)]
   basis.fun<-function(x){
   return(bs(c(0,1,x),knots=knots.bspline,intercept=TRUE,degree=3)[-c(1,2),])
@@ -107,7 +107,6 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
       beta.pen<-beta.pen+sqrt(beta.pen.i)
     }
     beta.pen<-beta.pen*lambda
-
 
     #fpc residual
     ys.resi.hat<-rep(0,length(ys))
@@ -231,14 +230,14 @@ else{
   n3<-n2+K0*res$n.sub
 }
   pars.vec2split1<-function(pars.vec){
-    #split the pars.vec into beta,thetaCs
+    #split the pars.vec
     beta<-pars.vec[1:n1]
     thetaCs<-pars.vec[(n1+1):n2]
     thetaCs<-matrix(thetaCs,nrow=K,ncol=n.sub)
     return(list(beta=beta,thetaCs=thetaCs))
   }
   pars.vec2split2<-function(pars.vec){
-    #split the pars.vec into beta,theta,cs
+    #split the pars.vec
     beta<-pars.vec[1:n1]
     theta<-pars.vec[(n1+1):n2]
     cs<-pars.vec[(n2+1):n3]
@@ -306,6 +305,9 @@ else{
   res$id.sub<-id.sub
   res$K<-K
   res$K0<-K0
+  res$lambda<-lambda
+  res$lam.nuc<-lam.nuc
+  res$opt<-method.optim
   indexs<-indexs[1:res$n.sub]
   res$subs<-data.sort[indexs,id.sub]
   beta<-res$beta

@@ -10,22 +10,12 @@
 #'
 
 myInt<-function(fun,K,tol=1e-6,start=0,end=1){
-  ##second derivative
-  #fun2d<-function(x){
-   # epsilon<-1e-8
-    ##x[x<start+1.5*epsilon]<-start+1.5*epsilon
-    ##x[x>end-1.5*epsilon]<-end-1.5*epsilon
-    #return((fun(x+epsilon)+fun(x-epsilon)-2*fun(x))/(epsilon^2))
-  #}
-  #sum of the (f+phi*f'') for all entries of x
   sumFunAll<-function(x){
     f<-fun(x)
     if(is.vector(f) && K!=1){
       return(f%*%t(f))
     }
     return(t(f)%*%f)
-    #f2d<-fun2d(x)
-    #return(t(f)%*%f+phi*t(f2d)%*%f2d)
   }
   N<-1
   h<-end-start

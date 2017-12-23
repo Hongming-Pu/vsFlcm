@@ -6,11 +6,9 @@
 #'
 stanFit<-function(data){
   dat.matrix<-as.matrix(data)
-  #means<-apply(dat.matrix,2,mean)
   sds<-sqrt(apply(dat.matrix,2,var))
   n<-nrow(dat.matrix)
   m1<-matrix(1,nrow=n,ncol=1)
-  #dat.matrix<-(dat.matrix-m1%*%means)/(m1%*%sds)
   dat.matrix<-dat.matrix/(m1%*%sds)
   return(list(mat=dat.matrix,sds=sds))
 }

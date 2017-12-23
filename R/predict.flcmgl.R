@@ -20,7 +20,6 @@ predict.flcmgl<-function(obj,data,sub.reg=TRUE){
 
   bas<-obj$basis.fun(ts)
   bas.beta<-bas%*%obj$beta
-  #mean.mat<-rep(1,n) %*% t(obj$means)
   sd.mat<-rep(1,n) %*% t(obj$sds)
   values.pre= data %>% subset(select=obj$predictors) %>%
     '/'(sd.mat) %>%
@@ -34,7 +33,7 @@ predict.flcmgl<-function(obj,data,sub.reg=TRUE){
   }
   if(sub.reg && obj$fpc.on){
       thetaCs<-matrix(0,nrow=obj$K,ncol = obj$n.sub+1)
-      thetaCs[,1:obj$n.sub]<-res$thetaCs
+      thetaCs[,1:(obj$n.sub)]<-obj$thetaCs
       values.resi.pre<-rep(0,length(values.pre))
       m1<-matrix(rep(data[,obj$id.sub],obj$n.sub),nrow=n,ncol = obj$n.sub)
       m2<-matrix(rep(obj$subs,n),ncol = obj$n.sub,nrow=n,byrow = TRUE)
