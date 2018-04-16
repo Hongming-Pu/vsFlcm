@@ -16,6 +16,9 @@
 #' @param fpc.on Logical. Whether fpc will be used
 #' @param lam.nuc Only Useful when \code{method.obj}='nuclear'. penalty factor for the nuclear norm
 #' @param method.obj the methodology chosen. Should be 'nuclear' or 'nonconvex'. Typically, we recommend 'nuclear'
+#' @param spline.fun2d second derivative of \code{spline.fun}, if \code{spline.fun} is default then the second derivative will be computed automaticly and you don't need to provide values for \code{spline.fun2d}. Otherwise you need to provide a function with input and output dimensions in accordance with \code{spline.fun} if you want to model the smoothness.
+#' @param lam.smo penalty factor for the second derivative of basis funtion. Only useful when \code{spline.fun} is default or \code{spline.fun2d} is not NULL
+#' @param maxit \code{maxit} of \code{optim}
 #'
 #' @author Hongming Pu \email{phmhappier@@163.com}
 #'
@@ -29,7 +32,8 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
                  id.sub=NULL,t.min=NULL,t.max=NULL,
                  K=5,spline.fun='B-spline',lambda=0.5,K0=2,lam.nuc=10,method.obj=c('nuclear','nonconvex'),
                  delta=1e-1,method.optim=c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
-                                           "Brent"),times=1,fpc.on=TRUE){
+                                           "Brent"),times=1,fpc.on=TRUE,spline.fun2d=NULL,lam.smo=0,maxit=100){
+
   if (is.null(id.sub)) {
     stop("Please specify the subject ID")}
   if(is.null(id.time)){
@@ -89,12 +93,29 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
 
   #compute basis and design matrix
   knots.bspline<-quantile(ts,probs=seq(0,1,length=K-2))[-c(1,K-2)]
-  basis.fun<-function(x){
-  return(bs(c(0,1,x),knots=knots.bspline,intercept=TRUE,degree=3)[-c(1,2),])
+  bspline.fun<-function(x){
+    return(bs(c(-0.0001,1.0001,x),knots=knots.bspline,intercept=TRUE,degree=3)[-c(1,2),])
   }
-  if(spline.fun!='B-spline'){basis.fun<-spline.fun}
+  bspline.fun2d<-function(x){
+    eps<-1e-5
+    y1<-bspline.fun(x+eps)
+    y2<-bspline.fun(x-eps)
+    y<-bspline.fun(x)
+    return((y1+y2-2*y)/(eps^2))
+  }
+  if(spline.fun!='B-spline'){
+    basis.fun<-spline.fun
+    bas.pen.mat<-myInt(basis.fun,K)
+    if(! is.null(spline.fun2d)){
+      bas.pen2d.mat<-myInt(spline.fun2d,K)
+      bas.pen.mat<-bas.pen.mat+lam.smo*bas.pen2d.mat
+    }
+  }
+  else{
+    basis.fun<-bspline.fun
+    bas.pen.mat<-myInt(bspline.fun,K)+lam.smo*myInt(bspline.fun2d,K)
+  }
   res$basis.fun<-basis.fun
-  bas.pen.mat<-myInt(basis.fun,K)
   bas.mat<-basis.fun(ts)
   design.mat<-kronecker(pre.mat,t(rep(1,K)))*kronecker(t(rep(1,num.pre)),bas.mat)
 
@@ -124,7 +145,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
     ys.hat<-design.mat%*%beta
     ys.resi<-ys-ys.hat
     if(! fpc){
-    der.beta<- t(ys.resi)%*%design.mat}
+      der.beta<- t(ys.resi)%*%design.mat}
     der.thetaCs<-matrix(0,nrow=K,ncol=n.sub)
 
     for(i in c(1:res$n.sub)){
@@ -148,10 +169,10 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
       temp<-bas.pen.mat%*%beta[((i-1)*K+1):(i*K)]
       beta.pen.i<-sum(beta[((i-1)*K+1):(i*K)]*temp)
       if(beta.pen.i!=0){
-      der.beta[a:b]<-der.beta[a:b]+lambda*temp/sqrt(beta.pen.i)}
+        der.beta[a:b]<-der.beta[a:b]+lambda*temp/sqrt(beta.pen.i)}
     }
     if(! fpc){
-    der.thetaCs<-rep(0,K*n.sub)}
+      der.thetaCs<-rep(0,K*n.sub)}
     return(c(der.beta,der.thetaCs))
   }
   obj.fun.raw2<-function(beta,theta,cs,fpc=TRUE){
@@ -220,15 +241,15 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
     return(c(der.beta,der.theta,der.cs))
   }
 
-if(res$method.obj=='nuclear'){
-  n1<-K*num.pre
-  n2<-n1+K*n.sub
-  n3=n2}
-else{
-  n1<-K*num.pre
-  n2<-n1+K*K0
-  n3<-n2+K0*res$n.sub
-}
+  if(res$method.obj=='nuclear'){
+    n1<-K*num.pre
+    n2<-n1+K*n.sub
+    n3=n2}
+  else{
+    n1<-K*num.pre
+    n2<-n1+K*K0
+    n3<-n2+K0*res$n.sub
+  }
   pars.vec2split1<-function(pars.vec){
     #split the pars.vec
     beta<-pars.vec[1:n1]
@@ -252,42 +273,61 @@ else{
     pars.vec2split<-pars.vec2split2
     obj.fun.raw<-obj.fun.raw2
     gra.fun.raw<-gra.fun.raw2
-    }
+  }
   obj.fun<-function(pars.vec){
     #pars.vec is a vector combining beta theta cs or beta thetaCs
     pars.split<-pars.vec2split(pars.vec)
     if(res$method.obj=='nuclear'){
-    return(obj.fun.raw(pars.split$beta,pars.split$thetaCs,fpc = fpc.on))}
+      return(obj.fun.raw(pars.split$beta,pars.split$thetaCs,fpc = fpc.on))}
     else{
-    return(obj.fun.raw(pars.split$beta,pars.split$theta,pars.split$cs,fpc = fpc.on))
+      return(obj.fun.raw(pars.split$beta,pars.split$theta,pars.split$cs,fpc = fpc.on))
     }
   }
   gra.fun<-function(pars.vec){
     pars.split<-pars.vec2split(pars.vec)
     if(res$method.obj=='nuclear'){
-    return(gra.fun.raw(pars.split$beta,pars.split$thetaCs,fpc = fpc.on))}
+      return(gra.fun.raw(pars.split$beta,pars.split$thetaCs,fpc = fpc.on))}
     else{
-    return(gra.fun.raw(pars.split$beta,pars.split$theta,pars.split$cs,fpc = fpc.on))
+      return(gra.fun.raw(pars.split$beta,pars.split$theta,pars.split$cs,fpc = fpc.on))
     }
   }
   pars.start<-rnorm(n3,0,1)
-  optim.res<-optim(par=pars.start,fn=obj.fun,gr=gra.fun, method = method.optim)
+
+  cont<-list()
+  cont$maxit<-maxit
+  optim.res<-optim(par=pars.start,fn=obj.fun,gr=gra.fun, method = method.optim, control=cont)
 
   if(res$method.obj=='nonconvex'){
-  for (i in c(2:times)) {
-    pars.start<-rnorm(n3,0,i)
-    optim.res.new<-optim(par=pars.start,fn=obj.fun,gr=gra.fun, method = method.optim)
-    if(optim.res.new$value<optim.res$value){
-      optim.res<-optim.res.new
+    for (i in c(2:times)) {
+      pars.start<-rnorm(n3,0,i)
+      optim.res.new<-optim(par=pars.start,fn=obj.fun,gr=gra.fun, method = method.optim)
+      if(optim.res.new$value<optim.res$value){
+        optim.res<-optim.res.new
+      }
     }
   }
+
+
+  thres<-1e-7
+  for(i in 1:num.pre){
+  temp<-bas.pen.mat%*%optim.res$par[((i-1)*K+1):(i*K)]
+  beta.pen.i<-sum(optim.res$par[((i-1)*K+1):(i*K)]*temp)
+
+    par2<-optim.res$par
+    par2[((i-1)*K+1):(i*K)]<-0
+    val.new<-obj.fun(par2)
+    val.old<-obj.fun(optim.res$par)
+    if(val.new<val.old || abs(val.new-val.old)/max(abs(val.new),abs(val.old))<thres){
+      optim.res$par<-par2
+    }
   }
   pars.list<-pars.vec2split(optim.res$par)
   res$beta<-matrix(pars.list$beta,nrow=K,ncol=length(res$predictors))
 
+
   if(fpc.on){
     if(res$method.obj=='nuclear'){
-    res$thetaCs<-pars.list$thetaCs}
+      res$thetaCs<-pars.list$thetaCs}
     else{
       theta<-pars.list$theta
       cs<-pars.list$cs
@@ -307,6 +347,7 @@ else{
   res$K0<-K0
   res$lambda<-lambda
   res$lam.nuc<-lam.nuc
+  res$lam.smo<-lam.smo
   res$opt<-method.optim
   indexs<-indexs[1:res$n.sub]
   res$subs<-data.sort[indexs,id.sub]
