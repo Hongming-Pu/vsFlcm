@@ -4,11 +4,13 @@
 \alias{vsflcm}
 \title{Implements group lasso with fpc for the linear functional concurrent model}
 \usage{
-vsflcm(formula, data = NULL, id.time = NULL, id.sub = NULL,
-  t.min = NULL, t.max = NULL, K = 5, spline.fun = "B-spline",
-  lambda = 0.5, K0 = 2, lam.nuc = 10, method.obj = c("nuclear",
-  "nonconvex"), delta = 0.1, method.optim = c("Nelder-Mead", "BFGS", "CG",
-  "L-BFGS-B", "SANN", "Brent"), times = 1, fpc.on = TRUE)
+vsflcm(formula, data = NULL, id.time = NULL, intercept = TRUE,
+  id.sub = NULL, t.min = NULL, t.max = NULL, K = 5,
+  spline.fun = "B-spline", lambda = 0.5, K0 = 2, lam.nuc = 10,
+  method.obj = c("nuclear", "nonconvex"), delta = 0.1,
+  method.optim = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent"),
+  times = 1, fpc.on = TRUE, spline.fun2d = NULL, lam.smo = 0,
+  maxit = 100)
 }
 \arguments{
 \item{formula}{formula for the regression. should have form \code{ y ~ V1 + V2 + ... + Vk}. Note: don't contain \code{id.time}}
@@ -16,6 +18,8 @@ vsflcm(formula, data = NULL, id.time = NULL, id.sub = NULL,
 \item{data}{data frame}
 
 \item{id.time}{the variable that represents time}
+
+\item{intercept}{logical, whether use intercept function}
 
 \item{id.sub}{variable giving subject ID}
 
@@ -42,6 +46,12 @@ vsflcm(formula, data = NULL, id.time = NULL, id.sub = NULL,
 \item{times}{Only useful when \code{method.obj}='nonconvex'. the algorithm randomly chooses \code{times} initial points to optimize and select the best}
 
 \item{fpc.on}{Logical. Whether fpc will be used}
+
+\item{spline.fun2d}{second derivative of \code{spline.fun}, if \code{spline.fun} is default then the second derivative will be computed automaticly and you don't need to provide values for \code{spline.fun2d}. Otherwise you need to provide a function with input and output dimensions in accordance with \code{spline.fun} if you want to model the smoothness.}
+
+\item{lam.smo}{penalty factor for the second derivative of basis funtion. Only useful when \code{spline.fun} is default or \code{spline.fun2d} is not NULL}
+
+\item{maxit}{\code{maxit} of \code{optim}}
 }
 \description{
 Implements group lasso with fpc for the linear functional concurrent model
