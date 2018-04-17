@@ -19,6 +19,7 @@
 #' @param spline.fun2d second derivative of \code{spline.fun}, if \code{spline.fun} is default then the second derivative will be computed automaticly and you don't need to provide values for \code{spline.fun2d}. Otherwise you need to provide a function with input and output dimensions in accordance with \code{spline.fun} if you want to model the smoothness.
 #' @param lam.smo penalty factor for the second derivative of basis funtion. Only useful when \code{spline.fun} is default or \code{spline.fun2d} is not NULL
 #' @param maxit \code{maxit} of \code{optim}
+#' @param intercept logical, whether use intercept function
 #'
 #' @author Hongming Pu \email{phmhappier@@163.com}
 #'
@@ -28,7 +29,7 @@
 #' @export
 #'
 
-vsflcm<-function(formula,data=NULL,id.time=NULL,
+vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
                  id.sub=NULL,t.min=NULL,t.max=NULL,
                  K=5,spline.fun='B-spline',lambda=0.5,K0=2,lam.nuc=10,method.obj=c('nuclear','nonconvex'),
                  delta=1e-1,method.optim=c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
@@ -40,10 +41,16 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
     stop("Please specify the time ID")}
   if(is.null(data)){
     stop('data missed, illegal input')}
+
   method.optim<-match.arg(method.optim)
   tf <- terms.formula(formula, specials = NULL)
   res<-list()
   res$predictors <- attr(tf, "term.labels")
+  res$intercept=intercept
+  if(intercept){
+    res$predictors<-c(res$predictors,"intercept")
+    data[,'intercept']<-1
+  }
   res$method.obj<-match.arg(method.obj)
   variable.L<-as.character(formula)[2]
   datNamesFull<-colnames(data)
@@ -74,6 +81,8 @@ vsflcm<-function(formula,data=NULL,id.time=NULL,
   pre.mat<-stan.pre$mat
   ts<-as.matrix((data.sort[id.time]-t.min)/(t.max-t.min))
   ys<-as.matrix(data.sort[variable.L])
+  res$y.mean<-mean(ys)
+  ys<-ys-res$y.mean
   subs<-as.matrix(data.sort[id.sub])
 
   #assign the indexes according to the subjects

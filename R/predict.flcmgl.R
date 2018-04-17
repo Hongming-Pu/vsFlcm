@@ -16,6 +16,7 @@
 
 predict.flcmgl<-function(obj,data,sub.reg=TRUE){
   n<-nrow(data)
+  if(obj$intercept){data[,'intercept']<-1}
   ts<-(as.matrix(data[obj$id.time])-obj$t.min)/(obj$t.max-obj$t.min)
 
   bas<-obj$basis.fun(ts)
@@ -24,7 +25,7 @@ predict.flcmgl<-function(obj,data,sub.reg=TRUE){
   values.pre= data %>% subset(select=obj$predictors) %>%
     '/'(sd.mat) %>%
     '*'(bas.beta) %>% apply(1, sum)
-
+  values.pre<-values.pre+obj$y.mean
   fun<-function(x){
     temp<-which(x)
     if(length(temp==1)){
