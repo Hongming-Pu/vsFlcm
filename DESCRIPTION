@@ -1,7 +1,7 @@
 Package: vsFlcm
 Type: Package
 Title: Variable Selection(Group Lasso) for the Functional Linear Concurrent Model
-Version: 0.2.0
+Version: 0.2.1
 Author: Hongming Pu
 Maintainer: Hongming Pu <phmhappier@163.com>
 Description: Variable Selection(Group Lasso) for the functional linear concurrent model 
@@ -15,7 +15,7 @@ Collate:
     'stanFit.R'
     'predict.flcmgl.R'
     'vsflcm.R'
-    'cv.vsflcm.R'
+    'tune.par.vsflcm.R'
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true

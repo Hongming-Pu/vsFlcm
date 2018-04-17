@@ -1,7 +1,7 @@
 exportPattern("^[[:alpha:]]+")
 S3method(predict,flcmgl)
 export(vsflcm)
-export(cv.vsflcm)
+export(tune.par.vsflcm)
 import(dplyr)
 importFrom(splines,bs)
 importFrom(stats,predict)
