@@ -4,7 +4,7 @@
 \alias{stanFit}
 \title{This function standarizes the predictors}
 \usage{
-stanFit(data)
+stanFit(data, intercept)
 }
 \arguments{
 \item{data}{data to be standarized}
