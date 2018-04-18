@@ -22,7 +22,8 @@ predict.flcmgl<-function(obj,data,sub.reg=TRUE){
   bas<-obj$basis.fun(ts)
   bas.beta<-bas%*%obj$beta
   sd.mat<-rep(1,n) %*% t(obj$sds)
-  values.pre= data %>% subset(select=obj$predictors) %>%
+  mean.mat<-rep(1,n) %*% t(obj$means)
+  values.pre= data %>% subset(select=obj$predictors) %>% '-' (mean.mat) %>%
     '/'(sd.mat) %>%
     '*'(bas.beta) %>% apply(1, sum)
   values.pre<-values.pre+obj$y.mean

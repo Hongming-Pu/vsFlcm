@@ -75,8 +75,9 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
 
   data.sort<-data[order(data[id.sub]),c(variable.L,id.sub,id.time,res$predictors)]
   #standardize
-  stan.pre<-stanFit(data.sort[res$predictors])
+  stan.pre<-stanFit(data.sort[res$predictors],intercept)
   res$sds<-stan.pre$sds
+  res$means<-stan.pre$means
   num.pre<-length(res$sds)#number of predictors
   pre.mat<-stan.pre$mat
   ts<-as.matrix((data.sort[id.time]-t.min)/(t.max-t.min))
