@@ -35,6 +35,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
                  delta=1e-1,method.optim=c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
                                            "Brent"),times=1,fpc.on=TRUE,spline.fun2d=NULL,lam.smo=0,maxit=100){
 
+
   if (is.null(id.sub)) {
     stop("Please specify the subject ID")}
   if(is.null(id.time)){
@@ -156,7 +157,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
     ys.resi<-ys-ys.hat
     if(! fpc){
       der.beta<- t(ys.resi)%*%design.mat}
-    der.thetaCs<-matrix(0,nrow=K,ncol=n.sub)
+    der.thetaCs<-matrix(0,nrow=K,ncol=res$n.sub)
 
     for(i in c(1:res$n.sub)){
       a<-indexs[i]
@@ -182,7 +183,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
         der.beta[a:b]<-der.beta[a:b]+lambda*temp/sqrt(beta.pen.i)}
     }
     if(! fpc){
-      der.thetaCs<-rep(0,K*n.sub)}
+      der.thetaCs<-rep(0,K*res$n.sub)}
     return(c(der.beta,der.thetaCs))
   }
   obj.fun.raw2<-function(beta,theta,cs,fpc=TRUE){
@@ -253,7 +254,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
 
   if(res$method.obj=='nuclear'){
     n1<-K*num.pre
-    n2<-n1+K*n.sub
+    n2<-n1+K*res$n.sub
     n3=n2}
   else{
     n1<-K*num.pre
@@ -264,7 +265,7 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
     #split the pars.vec
     beta<-pars.vec[1:n1]
     thetaCs<-pars.vec[(n1+1):n2]
-    thetaCs<-matrix(thetaCs,nrow=K,ncol=n.sub)
+    thetaCs<-matrix(thetaCs,nrow=K,ncol=res$n.sub)
     return(list(beta=beta,thetaCs=thetaCs))
   }
   pars.vec2split2<-function(pars.vec){
