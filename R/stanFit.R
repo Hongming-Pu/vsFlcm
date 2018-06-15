@@ -14,7 +14,9 @@ stanFit<-function(data, intercept){
   n<-nrow(dat.matrix)
   m1<-matrix(1,nrow=n,ncol=1)
   dat.matrix<-dat.matrix-m1%*%means
-  sds<-sqrt(apply(dat.matrix,2,ms))
+  if(intercept){
+  sds<-sqrt(apply(dat.matrix,2,ms))}
+  else{sds<-matrix(1,nrow=1,ncol=ncol(dat.matrix))}
 
 
   dat.matrix<-dat.matrix/(m1%*%sds)

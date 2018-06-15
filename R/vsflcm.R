@@ -19,7 +19,7 @@
 #' @param spline.fun2d second derivative of \code{spline.fun}, if \code{spline.fun} is default then the second derivative will be computed automaticly and you don't need to provide values for \code{spline.fun2d}. Otherwise you need to provide a function with input and output dimensions in accordance with \code{spline.fun} if you want to model the smoothness.
 #' @param lam.smo penalty factor for the second derivative of basis funtion. Only useful when \code{spline.fun} is default or \code{spline.fun2d} is not NULL
 #' @param maxit \code{maxit} of \code{optim}
-#' @param intercept logical, whether use intercept function
+#' @param intercept logical, whether use intercept function, if FALSE, the predictors and responses won't be normalized automatically
 #'
 #' @author Hongming Pu \email{phmhappier@@163.com}
 #'
@@ -83,7 +83,10 @@ vsflcm<-function(formula,data=NULL,id.time=NULL, intercept=TRUE,
   pre.mat<-stan.pre$mat
   ts<-as.matrix((data.sort[id.time]-t.min)/(t.max-t.min))
   ys<-as.matrix(data.sort[variable.L])
-  res$y.mean<-mean(ys)
+  if(intercept){
+  res$y.mean<-mean(ys)}
+  else{res$y.mean<-0}
+
   ys<-ys-res$y.mean
   subs<-as.matrix(data.sort[id.sub])
 
