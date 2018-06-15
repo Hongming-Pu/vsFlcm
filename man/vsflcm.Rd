@@ -19,7 +19,7 @@ vsflcm(formula, data = NULL, id.time = NULL, intercept = TRUE,
 
 \item{id.time}{the variable that represents time}
 
-\item{intercept}{logical, whether use intercept function}
+\item{intercept}{logical, whether use intercept function, if FALSE, the predictors and responses won't be normalized automatically}
 
 \item{id.sub}{variable giving subject ID}
 
